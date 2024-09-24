@@ -68,8 +68,8 @@ function rainflow(stresses)
     end
     
     for c in 1:pidx-1
-        s₁ = stresses[points[c]]
-        s₂ = stresses[points[c+1]]
+        s₁ = stress[points[c]]
+        s₂ = stress[points[c+1]]
         range = abs(s₁-s₂)
         mean = 0.5*(s₁+s₂)
         cidx += 1
@@ -99,14 +99,13 @@ function cal_equivalent_fatigue(cycles::Vector{Tuple{Float64,Float64,Float64}})
 end
 
 function SN_curve(S, m, C)
-    m = 10
-    C = 9.77e70
-    S = cycle[2]
     return C * S^(-m)
 end
 
 # 定义计算累计疲劳损伤值的函数
-function calculate_cumulative_damage(cycles, m, C, max_stress)
+function calculate_cumulative_damage(cycles)
+    C = 9.77e70
+    m = 10
     total_damage = 0.0
     fatigue_life_dict = Dict{Float64, Float64}()
 
@@ -120,7 +119,7 @@ function calculate_cumulative_damage(cycles, m, C, max_stress)
         corrected_range = correction(range, mean)
         
         # 获取对应的疲劳寿命
-        fatigue_life = fatigue_life_dict[corrected_range]
+        fatigue_life = fatigue_life_dict[range]
         
         # 计算每个循环的损伤
         damage = n / fatigue_life
