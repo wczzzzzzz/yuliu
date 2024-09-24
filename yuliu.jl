@@ -12,9 +12,9 @@ df = DataFrame(XLSX.readtable(filename, "主轴扭矩"))  # 读取 Excel 表格�
 
 # 假设数据中有两列，分别是时间和应力
 time = df[1:100, "T(s)"]  # 替换为 Excel 中的实际列名
-# for i in 1:100
-    # stress = df[1:100, "WT$i"]  # 替换为 Excel 中的实际列名
-    stress = df[1:100, "WT1"]  # 替换为 Excel 中的实际列名
+for i in 1:100
+    stress = df[1:100, "WT$i"]  # 替换为 Excel 中的实际列名
+    # stress = df[1:100, "WT1"]  # 替换为 Excel 中的实际列名
 
     @timeit to "Rainflow cycle counting algorithm" begin
     cycles, cycles_info = rainflow(stress)
@@ -22,11 +22,16 @@ time = df[1:100, "T(s)"]  # 替换为 Excel 中的实际列名
 
     LN = cal_equivalent_fatigue(cycles)
     println(LN)
-# end
+
+    total_damage = calculate_cumulative_damage(cycles)
+    println("Total Cumulative Fatigue Damage: ", total_damage)
+end
 
 wave_length = Float64[]
 for (cycle,cycle_info) in zip(cycles,cycles_info)
     push!(wave_length,(cycle_info[3]-cycle_info[1])/cycle[1])
 end
+
+
 
 show(to)

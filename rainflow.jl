@@ -98,3 +98,36 @@ function cal_equivalent_fatigue(cycles::Vector{Tuple{Float64,Float64,Float64}})
     return (L/N)^(1/m)
 end
 
+function SN_curve(S, m, C)
+    m = 10
+    C = 9.77e70
+    S = cycle[2]
+    return C * S^(-m)
+end
+
+# 定义计算累计疲劳损伤值的函数
+function calculate_cumulative_damage(cycles, m, C, max_stress)
+    total_damage = 0.0
+    fatigue_life_dict = Dict{Float64, Float64}()
+
+    # 假设的疲劳寿命数据，可以根据实际数据进行调整
+    for S in unique([cycle[2] for cycle in cycles])  # 提取唯一的应力幅值
+        fatigue_life_dict[S] = SN_curve(S, m, C)  # 计算对应的疲劳寿命并存储在字典中
+    end
+
+    for (n, range, mean) in cycles
+        # Goodman 曲线修正
+        corrected_range = correction(range, mean)
+        
+        # 获取对应的疲劳寿命
+        fatigue_life = fatigue_life_dict[corrected_range]
+        
+        # 计算每个循环的损伤
+        damage = n / fatigue_life
+        
+        # 累加损伤
+        total_damage += damage
+    end
+
+    return total_damage
+end
